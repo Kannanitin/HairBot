@@ -8,73 +8,305 @@ from datetime import datetime
 # Custom CSS for enhanced styling
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    /* Main container with gradient background */
     .main {
-        background-color: #1e1e1e;
-        color: #ffffff;
-        font-family: 'Arial', sans-serif;
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+        color: #e0e6ed;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        min-height: 100vh;
     }
-    .stButton>button {
-        background-color: #4CAF50;
+    
+    /* Global backdrop blur effect */
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(ellipse at top, rgba(120, 119, 198, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: -1;
+    }
+    
+    /* Enhanced buttons with glassmorphism */
+    .stButton > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        border-radius: 12px;
-        padding: 12px 24px;
-        font-weight: bold;
-        transition: all 0.3s ease;
+        border-radius: 16px;
+        padding: 14px 28px;
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         border: none;
+        box-shadow: 
+            0 8px 32px rgba(102, 126, 234, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
     }
-    .stButton>button:hover {
-        background-color: #45a049;
-        transform: scale(1.05);
+    
+    .stButton > button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.6s;
     }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 
+            0 12px 40px rgba(102, 126, 234, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    
+    .stButton > button:hover::before {
+        left: 100%;
+    }
+    
+    .stButton > button:active {
+        transform: translateY(0) scale(0.98);
+    }
+    
+    /* Glassmorphism input fields */
     .stSelectbox, .stTextInput, .stRadio, .stMultiselect {
-        background-color: #2c2c2c;
-        border-radius: 8px;
-        padding: 10px;
-        color: #ffffff;
-    }
-    .stFileUploader {
-        background-color: #2c2c2c;
-        border-radius: 8px;
-        padding: 10px;
-    }
-    .stExpander {
-        background-color: #252525;
-        border-radius: 10px;
-        margin-bottom: 12px;
-        border: 1px solid #4CAF50;
-    }
-    .stExpander .st-expander {
-        background-color: #2c2c2c;
-        color: #ffffff;
-    }
-    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
-        color: #4CAF50;
-        font-weight: bold;
-    }
-    .diagnosis-box {
-        background-color: #333333;
-        padding: 20px;
+        background: rgba(45, 55, 72, 0.6);
+        backdrop-filter: blur(20px);
         border-radius: 12px;
-        border-left: 6px solid #4CAF50;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
     }
+    
+    .stSelectbox:hover, .stTextInput:hover, .stRadio:hover, .stMultiselect:hover {
+        border-color: rgba(102, 126, 234, 0.5);
+        box-shadow: 
+            0 8px 32px rgba(102, 126, 234, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Enhanced file uploader */
+    .stFileUploader {
+        background: rgba(45, 55, 72, 0.6);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 20px;
+        border: 2px dashed rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stFileUploader:hover {
+        border-color: rgba(102, 126, 234, 0.6);
+        background: rgba(45, 55, 72, 0.8);
+    }
+    
+    /* Animated expanders */
+    .stExpander {
+        background: rgba(37, 47, 63, 0.8);
+        backdrop-filter: blur(15px);
+        border-radius: 16px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .stExpander:hover {
+        border-color: rgba(102, 126, 234, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stExpander .streamlit-expanderHeader {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        color: #e0e6ed;
+        font-weight: 600;
+        padding: 16px 20px;
+        border-radius: 16px 16px 0 0;
+    }
+    
+    /* Gradient headings with glow effect */
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+        text-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        margin-bottom: 20px;
+    }
+    
+    .stMarkdown h1 {
+        font-size: 2.5rem;
+        line-height: 1.2;
+    }
+    
+    .stMarkdown h2 {
+        font-size: 2rem;
+        line-height: 1.3;
+    }
+    
+    .stMarkdown h3 {
+        font-size: 1.5rem;
+        line-height: 1.4;
+    }
+    
+    /* Enhanced diagnosis box with animation */
+    .diagnosis-box {
+        background: linear-gradient(135deg, rgba(51, 65, 85, 0.9) 0%, rgba(71, 85, 105, 0.8) 100%);
+        backdrop-filter: blur(20px);
+        padding: 24px;
+        border-radius: 20px;
+        border-left: 6px solid #667eea;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .diagnosis-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+        background-size: 200% 100%;
+        animation: shimmer 3s ease-in-out infinite;
+    }
+    
+    @keyframes shimmer {
+        0%, 100% { background-position: -200% 0; }
+        50% { background-position: 200% 0; }
+    }
+    
+    .diagnosis-box:hover {
+        transform: translateY(-4px);
+        box-shadow: 
+            0 25px 80px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    
+    /* Modern warning box */
     .warning-box {
-        background-color: #ff4444;
-        padding: 10px;
-        border-radius: 8px;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(220, 38, 38, 0.8) 100%);
+        backdrop-filter: blur(10px);
+        padding: 16px 20px;
+        border-radius: 12px;
         color: #ffffff;
-        margin-bottom: 10px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3);
+        font-weight: 500;
     }
+    
+    /* Animated progress bar */
     .stProgress .st-bo {
-        background-color: #4CAF50;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        position: relative;
+        overflow: hidden;
     }
+    
+    .stProgress .st-bo::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: progressShine 2s ease-in-out infinite;
+    }
+    
+    @keyframes progressShine {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    
+    /* Subtle caption styling */
     .stCaption {
-        color: #aaaaaa;
+        color: #94a3b8;
         text-align: center;
-        margin-top: 20px;
+        margin-top: 24px;
+        font-size: 14px;
+        font-weight: 400;
+        opacity: 0.8;
     }
+    
+    /* Input field text colors */
     .stTextInput input, .stSelectbox select, .stRadio label, .stMultiselect div {
-        color: #ffffff !important;
+        color: #e0e6ed !important;
+        background: transparent;
+        border: none;
+        font-weight: 500;
+    }
+    
+    .stTextInput input:focus, .stSelectbox select:focus {
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+        outline: none;
+    }
+    
+    /* Sidebar enhancements */
+    .css-1d391kg {
+        background: linear-gradient(180deg, rgba(15, 15, 35, 0.95) 0%, rgba(26, 26, 46, 0.9) 100%);
+        backdrop-filter: blur(20px);
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: rgba(45, 55, 72, 0.3);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    }
+    
+    /* Floating animation for key elements */
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .diagnosis-box {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .stMarkdown h1 { font-size: 2rem; }
+        .stMarkdown h2 { font-size: 1.5rem; }
+        .stMarkdown h3 { font-size: 1.25rem; }
+        .diagnosis-box { padding: 16px; }
+        .stButton > button { padding: 12px 20px; }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -180,39 +412,40 @@ if symptom == "Hair Fall":
 
     # Norwood treatment dictionary
     norwood_treatment = {
-        "1": {
-            "treatment": "No treatment needed, but 5% minoxidil can be used as prevention.",
-            "reversible": True
-        },
-        "2": {
-            "treatment": "5% minoxidil + 0.1% topical finasteride (morning and night).",
-            "reversible": True
-        },
-        "3": {
-            "treatment": "10% minoxidil + oral or topical finasteride. Microneedling twice a week helps.",
-            "reversible": True
-        },
-        "3V": {
-            "treatment": "10% minoxidil + oral finasteride. Focus on crown treatment.",
-            "reversible": True
-        },
-        "4": {
-            "treatment": "High-strength minoxidil (10%) + oral finasteride. Microneedling recommended.",
-            "reversible": True
-        },
-        "5": {
-            "treatment": "Medical treatment might slow loss, but hair transplant is usually needed.",
-            "reversible": False
-        },
-        "6": {
-            "treatment": "Hair transplant is the most effective option. Meds can preserve donor hair.",
-            "reversible": False
-        },
-        "7": {
-            "treatment": "Only solution: hair transplant. Maintain donor area with oral finasteride.",
-            "reversible": False
-        }
+    "1": {
+        "treatment": "No treatment needed, but 5% minoxidil or LLLT (red light therapy) can be used as prevention.",
+        "reversible": True
+    },
+    "2": {
+        "treatment": "5% minoxidil + 0.1% topical finasteride (morning and night). PRP or LLLT may enhance results.",
+        "reversible": True
+    },
+    "3": {
+        "treatment": "10% minoxidil + oral or topical finasteride. Microneedling twice a week + PRP or LLLT recommended.",
+        "reversible": True
+    },
+    "3V": {
+        "treatment": "10% minoxidil + oral finasteride. Focus on crown with PRP or red light therapy support.",
+        "reversible": True
+    },
+    "4": {
+        "treatment": "High-strength minoxidil (10%) + oral finasteride. Microneedling + PRP or LLLT advised.",
+        "reversible": True
+    },
+    "5": {
+        "treatment": "Hair transplant often necessary. PRP/LLLT may slow loss. Medication (finasteride, minoxidil) can maintain.",
+        "reversible": True
+    },
+    "6": {
+        "treatment": "Hair transplant is the most effective option. PRP and medication can help retain donor hair.",
+        "reversible": False
+    },
+    "7": {
+        "treatment": "Only viable solution: hair transplant. Maintain donor area with finasteride, PRP may help scalp health.",
+        "reversible": False
     }
+}
+
 
     def recommend_treatment(stage):
         stage_str = str(stage)
@@ -238,48 +471,61 @@ if symptom == "Hair Fall":
 
     # Diagnosis Summary
     with st.expander("📋 Diagnosis Summary", expanded=True):
-        diagnosis = ""
-        tests = []
-        if not name or not age or not gender:
-            st.markdown("<div class='warning-box'>⚠️ Please complete the Basic Information section for a diagnosis.</div>", unsafe_allow_html=True)
-        if completed_sections < total_sections:
-            st.markdown("<div class='warning-box'>⚠️ Please complete all sections for a comprehensive diagnosis.</div>", unsafe_allow_html=True)
-        else:
-            if stress == "High" and diet_change == "Yes":
-                diagnosis += "Your hair fall may be due to **telogen effluvium** triggered by stress or nutritional changes.\n"
-                tests.append("Ferritin, Vitamin D, Zinc, Thyroid function (TSH, T3, T4)")
-            if pattern == "In patches" and scalp_issues == "No":
-                diagnosis += "Patchy hair loss without scalp irritation suggests **alopecia areata**. Consult a dermatologist for autoimmune evaluation.\n"
-                tests.append("Autoimmune markers (ANA, anti-thyroid antibodies)")
-            if "Thyroid problems" in conditions:
-                diagnosis += "Thyroid disorders may contribute to hair loss. Ensure optimal TSH levels.\n"
-                tests.append("Thyroid function tests (TSH, T3, T4)")
-            if "PCOS" in conditions or hormonal_issues:
-                diagnosis += "Hormonal imbalances (e.g., PCOS, pregnancy) may be contributing. Consult an endocrinologist.\n"
-                tests.append("Hormone panel (testosterone, DHEA-S, LH/FSH, prolactin)")
-            if tight_styles == "Yes":
-                diagnosis += "Frequent tight hairstyles may cause **traction alopecia**. Switch to looser styles to prevent further damage.\n"
-                tests.append("Trichoscopy (if loss persists)")
-            if family_history == "Yes" and pattern == "Mainly hairline/crown":
-                diagnosis += "Your hair loss pattern and family history suggest **androgenetic alopecia**. Consider minoxidil or finasteride.\n"
-                tests.append("Hormone panel (for women, if PCOS suspected)")
-            if scalp_issues == "Yes":
-                diagnosis += "Scalp irritation or flaking may indicate **seborrheic dermatitis** or **fungal infection**. Consult a dermatologist.\n"
-                tests.append("Fungal culture or KOH test")
-            if water_quality == "Yes":
-                diagnosis += "Exposure to **hard or chlorinated water** may contribute to hair breakage or scalp irritation. Use a shower filter or clarifying shampoo to reduce mineral buildup.\n"
-                tests.append("Water quality test (for mineral content or chlorine levels)")
-            if diet_type in ["Vegetarian", "Vegan"] and diet_change == "Yes":
-                diagnosis += f"Your {diet_type.lower()} diet with recent changes may lead to **nutritional deficiencies**. Ensure adequate protein, iron, and B12 intake.\n"
-                tests.append("Ferritin, Vitamin B12, Serum protein")
+       diagnosis = ""
+       tests = []
 
-            if diagnosis:
-                st.markdown(f"<div class='diagnosis-box'>{diagnosis}\n**Note**: Always consult a dermatologist to confirm this diagnosis and discuss treatment options.</div>", unsafe_allow_html=True)
-                if tests:
-                    st.markdown("### 🩺 Recommended Tests")
-                    st.write("- " + "\n- ".join(tests))
-            else:
-                st.info("No specific diagnosis pattern matched. Please provide more details or consult a dermatologist.")
+    if not name or not age or not gender:
+        st.markdown("<div class='warning-box'>⚠️ Please complete the Basic Information section for a diagnosis.</div>", unsafe_allow_html=True)
+
+    if completed_sections < total_sections:
+        st.markdown("<div class='warning-box'>⚠️ Please complete all sections for a comprehensive diagnosis.</div>", unsafe_allow_html=True)
+    else:
+        if stress == "High" and diet_change == "Yes":
+            diagnosis += "- Hair fall may be due to **Telogen Effluvium** triggered by stress or recent dietary changes.\n"
+            tests.append("Ferritin, Vitamin D, Zinc, Thyroid function (TSH, T3, T4)")
+
+        if pattern == "In patches" and scalp_issues == "No":
+            diagnosis += "- Patchy hair loss without scalp irritation suggests **Alopecia Areata**. Consult a dermatologist for autoimmune evaluation.\n"
+            tests.append("Autoimmune markers (ANA, anti-thyroid antibodies)")
+
+        if "Thyroid problems" in conditions:
+            diagnosis += "- Possible contribution from **Thyroid Dysfunction**. Check TSH levels and manage appropriately.\n"
+            tests.append("Thyroid function tests (TSH, T3, T4)")
+
+        if "PCOS" in conditions or any(issue != "None" for issue in hormonal_issues):
+            diagnosis += "- **Hormonal imbalances** (e.g., PCOS or pregnancy) may contribute to hair loss. Consultation with an endocrinologist is advised.\n"
+            tests.append("Hormone panel (testosterone, DHEA-S, LH/FSH, prolactin)")
+
+        if tight_styles == "Yes":
+            diagnosis += "- Frequent tight hairstyles could cause **Traction Alopecia**. Switch to looser styles to prevent further damage.\n"
+            tests.append("Trichoscopy (if hair loss persists)")
+
+        if family_history == "Yes" and pattern == "Mainly hairline/crown":
+            diagnosis += "- Pattern suggests **Androgenetic Alopecia** with family history. Consider treatments like minoxidil or finasteride.\n"
+            tests.append("Hormone panel (especially for women if PCOS suspected)")
+
+        if scalp_issues == "Yes":
+            diagnosis += "- Scalp irritation or flaking may indicate **Seborrheic Dermatitis** or **Fungal Infection**. Consult a dermatologist.\n"
+            tests.append("Fungal culture or KOH test")
+
+        if water_quality == "Yes":
+            diagnosis += "- Exposure to **hard/chlorinated water** may contribute to breakage or scalp issues. Use a shower filter or clarifying shampoo.\n"
+            tests.append("Water quality test (for mineral or chlorine content)")
+
+        if diet_type in ["Vegetarian", "Vegan"] and diet_change == "Yes":
+            diagnosis += f"- Your **{diet_type.lower()} diet** and recent changes may lead to nutritional deficiencies. Ensure adequate protein, iron, and B12.\n"
+            tests.append("Ferritin, Vitamin B12, Serum protein")
+
+        if diagnosis:
+            st.markdown("### 🧾 Diagnosis Summary")
+            st.markdown(diagnosis)
+            st.markdown("**Note**: Always consult a dermatologist to confirm the diagnosis and discuss treatment options.")
+
+            if tests:
+                st.markdown("### 🩺 Recommended Tests")
+                st.markdown("\n".join(f"- {t}" for t in tests))
+        else:
+            st.info("No specific diagnosis pattern matched. Please provide more details or consult a dermatologist.")
 
         # Download Diagnosis Report
         if st.button("📥 Download Diagnosis Report"):
